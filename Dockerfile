@@ -17,7 +17,7 @@ RUN sh /tmp/buildPaper.sh
 #####################
 # Build Start.class #
 #####################
-FROM openjdk:11-jdk as starter
+FROM adoptopenjdk/openjdk11:alpine-slim as starter
 
 # ------------------
 # Compile Start.java
