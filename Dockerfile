@@ -1,42 +1,37 @@
-####################
-# Build Spigot.jar #
-####################
-FROM openjdk:8-jdk-alpine as buildspigot
+#######################
+# Build paperclip.jar #
+#######################
+FROM maven:3-openjdk-11 as loadpaper
 
 # --------------
 # Define version
 # --------------
 ARG VERSION=latest
 
-# ------------------------------
-# Compile Spigot with BuildTools
-# ------------------------------
-RUN apk add --update --no-cache git wget \
- && cd /tmp \
- && wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar \
- && java -jar BuildTools.jar --rev $VERSION \
- && mv spigot-*.jar spigot.jar
+# -----------
+# Build paper
+# -----------
+COPY buildPaper.sh /tmp/
+RUN sh /tmp/buildPaper.sh
 
 #####################
 # Build Start.class #
 #####################
-FROM openjdk:8-jdk-alpine as starter
+FROM openjdk:11-jdk as starter
 
 # ------------------
 # Compile Start.java
 # ------------------
-RUN apk add --update --no-cache wget \
- && cd /tmp/ \
- && wget https://raw.githubusercontent.com/marcermarc/DockerMinecraft/master/StartProgram/Start.java \
- && javac Start.java \
- && chmod +x Start.class
+COPY buildStart.sh /tmp/
+ADD https://raw.githubusercontent.com/marcermarc/DockerMinecraft/master/StartProgram/Start.java /tmp/Start.java
+RUN sh /tmp/buildStart.sh
 
 #######
 # Run #
 #######
 FROM alpine:latest
 
-LABEL maintainer "docker@marcermarc.de"
+LABEL maintainer "marcel@andree.cloud"
 
 # -----------------------------------------------------------------------------------------------------------
 # Default extra params from:
@@ -44,20 +39,20 @@ LABEL maintainer "docker@marcermarc.de"
 # Set the classpath can start the Start.class
 # -----------------------------------------------------------------------------------------------------------
 ENV WORKDIR="/mnt/minecraft" \
-  COMMAND="java -Xmx2G -Xms2G -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:InitiatingHeapOccupancyPercent=10 -XX:G1MixedGCLiveThresholdPercent=50 -XX:+AggressiveOpts -XX:+AlwaysPreTouch -XX:+UseLargePagesInMetaspace -d64 -Dcom.mojang.eula.agree=true -Dfile.encoding=UTF-8 -jar /opt/minecraft/spigot.jar nogui" \
+  COMMAND="java -Xmx2G -Xms2G -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:InitiatingHeapOccupancyPercent=10 -XX:G1MixedGCLiveThresholdPercent=50 -XX:+AggressiveOpts -XX:+AlwaysPreTouch -XX:+UseLargePagesInMetaspace -d64 -Dcom.mojang.eula.agree=true -Dfile.encoding=UTF-8 -jar /opt/minecraft/paperclip.jar nogui" \
   CLASSPATH=/opt/start
 
 # --------------------------------
 # Copy files from the build images
 # --------------------------------
-COPY --from=buildspigot /tmp/spigot.jar /opt/minecraft/
+COPY --from=loadpaper /tmp/paper/paperclip.jar /opt/minecraft/
 COPY --from=starter /tmp/*.class /opt/start/
 
 # ------------------
 # Add user minecraft
 # ------------------
 RUN mkdir -p /mnt/minecraft \ 
- && apk add --no-cache openjdk8-jre-base nss \
+ && apk add --no-cache openjdk11-jre-base \
  && adduser -D minecraft -h /opt \
  && chown -R minecraft /mnt/minecraft /opt \
  && chmod -R 777 /mnt/minecraft /opt

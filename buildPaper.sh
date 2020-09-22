@@ -3,11 +3,11 @@
 
 # install git
 apt-get update
-apt-get install -y git
+apt-get install -y git patch
 
 # configure git (without paper will not build)
-git config --global user.email "docker@marcermarc.de"
-git config --global user.name "marcermarc"
+git config --global user.email "marcel@andree.cloud"
+git config --global user.name "Marcel Andree"
 
 # select version-branch from paper repo
 if [ "$VERSION" = "latest" ]; then \

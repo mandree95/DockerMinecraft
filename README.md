@@ -1,15 +1,17 @@
-# DockerMinecraft
-A Docker Image for Minecraft
-(Different Server possibilities)
+# PaperMC Docker Image
+Forked from https://github.com/marcermarc/DockerMinecraft.
 
-* Java program to start and stop the server regular
-* Only your userdata in the shared folder
-
-Links to Dockerhub:
-* Spigot: https://hub.docker.com/r/marcermarc/spigot/
-* Spigot with OpenJ9-Java:: https://hub.docker.com/r/marcermarc/spigot-j9/
-* Forge: https://hub.docker.com/r/marcermarc/forge/
-* PaperMC: https://hub.docker.com/r/marcermarc/papermc/
-* PaperMC with OpenJ9-Java: https://hub.docker.com/r/marcermarc/papermc-j9/
-
-you can use the docker-compose files in this repos
+## Example Docker Compose File
+```yaml
+version: "3"
+services:
+  papermc:
+    image: mandree95/papermc
+    volumes:
+      - ./data:/mnt/minecraft
+    ports:
+      - 25565:25565/tcp
+      - 25565:25565/udp
+    stdin_open: true
+    tty: true
+```
