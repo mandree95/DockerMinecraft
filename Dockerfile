@@ -52,7 +52,7 @@ COPY --from=starter /tmp/*.class /opt/start/
 # Add user minecraft
 # ------------------
 RUN mkdir -p /mnt/minecraft \ 
- && apk add --no-cache openjdk11-jre-base \
+ && apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/community openjdk11-jre-headless \
  && adduser -D minecraft -h /opt \
  && chown -R minecraft /mnt/minecraft /opt \
  && chmod -R 777 /mnt/minecraft /opt
